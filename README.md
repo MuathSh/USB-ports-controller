@@ -4,9 +4,20 @@ A project that focus on controlling external and internal USB ports and show the
 ## Screanshots:
 **some of the UI used and how it works:**
 
+Main UI:
+
 <img src="./images/1.png" width="450">
+
+chosing the device:
+
 <img src="./images/2.png" width="450">
+
+unbinding device:
+
 <img src="./images/3.png" width="450">
+
+rebinding device:
+
 <img src="./images/4.png" width="450">
 
 
@@ -31,5 +42,3 @@ pip install PyQt6 pyudev
 sudo python3 USBcontroller.py
 ```
 *The project need the sudo permession because it binds and unbinds USB ports*
-
-
