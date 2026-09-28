@@ -1,0 +1,43 @@
+class backend:
+    class port_t {
+        int id;
+        str name;
+        bool state;
+        enum str type;
+    }
+    class device_t {
+        int id;
+        str name;
+        port_t port;
+        int vendor_id;
+        int modul_id;
+        enum str type;
+        device_t children[];
+    }
+device_t get_d(int id);
+port_t get_p(int id);
+
+device_t[] get_ds(void);
+port_t[] get_ps(void);
+
+bool dis_d(int id);
+
+bool act_d(int id);
+
+bool dis_d(int id);
+
+bool act_p(int id);
+
+bool dis_p(int id);
+
+if win{
+    backend = win_backend;
+}
+if mac{
+    backend = mac_backend;
+}
+if linux{
+    backend = linux_backend;
+}
+
+backend.get_d
