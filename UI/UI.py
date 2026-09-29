@@ -59,15 +59,20 @@ window.setStyleSheet("""
         padding: 4px;
         border: none;
     }
+    QTreeWidget::item:selected {
+    background-color: #04395e;
+    color: #ffffff;
+    border-radius: 4px;
+}
 
 """)
 active_btn = CustomButton("Active", "#2e7d32", "#388e3c", "#1b5e20")
 unbind_btn = CustomButton("Unbind", "#a81c1c", "#d32f2f", "#7f1313")
 
 button_layout = QHBoxLayout()
+button_layout.setSpacing(10) 
 button_layout.addWidget(active_btn)
 button_layout.addWidget(unbind_btn)
-button_layout.addStretch()
 
 tree = QTreeWidget()
 tree.setHeaderLabels(["Sys Name", "USB Name", "Device Type", "Status"])
@@ -76,6 +81,16 @@ tree.setColumnWidth(1, 345)
 tree.setColumnWidth(2, 150)
 tree.setColumnWidth(3, 150)
 
+devices = [
+    ["usb1", "Kingston DataTraveler 3.0", "Storage", "Connected"],
+    ["usb2", "Logitech G Pro Wireless", "Mouse", "Active"],
+    ["usb3", "Razer BlackWidow V3", "Keyboard", "Active"],
+    ["usb4", "SanDisk Ultra Flair", "Storage", "Disabled"],
+]
+
+for dev in devices:
+    item = QTreeWidgetItem(dev)
+    tree.addTopLevelItem(item)
 
 
 left_layout = QVBoxLayout()
