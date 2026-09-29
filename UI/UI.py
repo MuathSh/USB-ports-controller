@@ -8,6 +8,32 @@ from PyQt6.QtWidgets import (
     QTreeWidgetItem, 
     QPushButton
 )
+from PyQt6.QtWidgets import QPushButton
+from PyQt6.QtCore import Qt
+
+#custm button to use 
+class CustomButton(QPushButton):
+    def __init__(self, text, bg_color, hover_color, pressed_color):
+        super().__init__(text)
+        
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        self.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {bg_color};
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: bold;
+                border: none;
+            }}
+            QPushButton:hover {{ 
+                background-color: {hover_color}; 
+            }}
+            QPushButton:pressed {{ 
+                background-color: {pressed_color}; 
+            }}
+        """)
 
 PROGRAM = QApplication(sys.argv)
 
@@ -33,20 +59,10 @@ window.setStyleSheet("""
         padding: 4px;
         border: none;
     }
-    QPushButton {
-        background-color: #007acc;
-        color: white;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: bold;
-    }
-    QPushButton:hover {
-        background-color: #0098ff;
-    }
-""")
 
-active_btn = QPushButton("Active")
-unbind_btn = QPushButton("Unbind")
+""")
+active_btn = CustomButton("Active", "#2e7d32", "#388e3c", "#1b5e20")
+unbind_btn = CustomButton("Unbind", "#a81c1c", "#d32f2f", "#7f1313")
 
 button_layout = QHBoxLayout()
 button_layout.addWidget(active_btn)
