@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
+from backend import Backend
 
 
-class Backend(ABC):
+class MacBackend(Backend):
 
     class DeviceType(Enum):
         CAMERA = "camera"
