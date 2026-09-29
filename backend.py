@@ -31,7 +31,7 @@ class Backend(ABC):
     class Device:
         id: int
         name: str
-        port: Backend.Port
+        port: "Backend.Port"
         vendor_id: int
         model_id: int
         type: "Backend.DeviceType"
