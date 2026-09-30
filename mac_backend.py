@@ -2,19 +2,11 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from backend import Backend
-import ctypes
-import ctypes.util
 
 
 class MacBackend(Backend):
 
     def __init__(self):
-        self.iokit = ctypes.cdll.LoadLibrary(ctypes.util.find_library("IOKit"))
-
-        self.cf = ctypes.CDLL(
-            "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation"
-        )
-
         self.devices = []
         self.ports = []
 
@@ -49,6 +41,11 @@ class MacBackend(Backend):
         model_id: int
         type: "Backend.DeviceType"
         children: list["Backend.Device"] = field(default_factory=list)
+
+    @dataclass
+    class UsbPort(Port):
+        gen: str
+        speed: int
 
     def get_d(self, id):
         """
@@ -96,16 +93,4 @@ class MacBackend(Backend):
         """
         Activate port by id
         """
-        pass
-
-    def _scan_usb(self):
-        pass
-
-    def _get_properties(self, entry):
-        pass
-
-    def _get_registry_id(self, entry):
-        pass
-
-    def _get_children(self, entry):
         pass
