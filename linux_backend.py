@@ -45,16 +45,16 @@ class LinuxBackend(Backend):
         path: str
         children: list["Backend.Device"] = field(default_factory=list)
 
-    def create_device(self, id):
-        device = None
-        try:
-            device = pyudev.Devices.from_name(self.Context, subsystem='usb', sys_name=id)
-        except pyudev._errors.DeviceNotFoundByNameError:
+    def create_device(self, id=None,device=None):
+        if device is None and id is not None:
             try:
-                device = pyudev.Devices.from_path(self.Context, id)
-            except pyudev._errors.DeviceNotFoundAtPathError:
-                print("Device not found")
-                return None
+                device = pyudev.Devices.from_name(self.Context, subsystem='usb', sys_name=id)
+            except pyudev._errors.DeviceNotFoundByNameError:
+                try:
+                    device = pyudev.Devices.from_path(self.Context, id)
+                except pyudev._errors.DeviceNotFoundAtPathError:
+                    print("Device not found")
+                    return None
 
         # Get vendor+model combined name.
         vendor = device.get('ID_VENDOR_FROM_DATABASE') or device.get('ID_VENDOR') or ''
@@ -101,7 +101,11 @@ class LinuxBackend(Backend):
         """
         Get all devices
         """
-        pass
+        devices = []
+        for device in self.Context.list_devices(subsystem='usb'):
+            devices.append(self.create_device(device=device))
+        return devices
+
 
     def get_ps(self):
         """
@@ -147,4 +151,6 @@ class LinuxBackend(Backend):
 
 
 lcx = LinuxBackend()
-print(lcx.get_d('usb3'))
+for d in lcx.get_ds():
+    print(d)
+# print(lcx.get_d(id='usb3'))
