@@ -6,7 +6,8 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, 
     QTreeWidget, 
     QTreeWidgetItem, 
-    QPushButton
+    QPushButton,
+    QHeaderView
 )
 from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtCore import Qt
@@ -59,11 +60,6 @@ window.setStyleSheet("""
         padding: 4px;
         border: none;
     }
-    QTreeWidget::item:selected {
-    background-color: #04395e;
-    color: #ffffff;
-    border-radius: 4px;
-}
 
 """)
 active_btn = CustomButton("Active", "#2e7d32", "#388e3c", "#1b5e20")
@@ -76,10 +72,24 @@ button_layout.addWidget(unbind_btn)
 
 tree = QTreeWidget()
 tree.setHeaderLabels(["Sys Name", "USB Name", "Device Type", "Status"])
-tree.setColumnWidth(0, 80)
-tree.setColumnWidth(1, 345)
-tree.setColumnWidth(2, 150)
-tree.setColumnWidth(3, 150)
+
+tree.setRootIsDecorated(False)
+tree.setSelectionBehavior(QTreeWidget.SelectionBehavior.SelectRows)
+tree.setSelectionMode(QTreeWidget.SelectionMode.SingleSelection)
+
+header = tree.header()
+
+header.setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
+tree.setColumnWidth(0, 90)
+
+header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+
+header.setSectionResizeMode(2, QHeaderView.ResizeMode.Interactive)
+tree.setColumnWidth(2, 130)
+
+header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
+tree.setColumnWidth(3, 100)
+
 
 devices = [
     ["usb1", "Kingston DataTraveler 3.0", "Storage", "Connected"],
