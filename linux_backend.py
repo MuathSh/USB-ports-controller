@@ -42,9 +42,11 @@ class LinuxBackend(Backend):
         vendor_id: int
         model_id: int
         type: "Backend.DeviceType"
+        path: str
         children: list["Backend.Device"] = field(default_factory=list)
 
     def create_device(self, id):
+        device = None
         try:
             device = pyudev.Devices.from_name(self.Context, subsystem='usb', sys_name=id)
         except pyudev._errors.DeviceNotFoundByNameError:
@@ -67,18 +69,19 @@ class LinuxBackend(Backend):
             port_type = Backend.PortType.UNKNOWN
 
         return Backend.Device(
-            int(device.sys_number),
-            full_name,
-            Backend.Port(
-                device.get('ID_USB_MODEL_ID'),
+            id=int(device.sys_number),
+            name=full_name,
+            port=Backend.Port(
+                device.get('ID_PATH'),
                 device.get('ID_USB_VENDOR'),
                 False if not device.driver else True,
                 port_type
             ),
-            device.get('ID_USB_VENDOR_ID'),
-            device.get('ID_MODEL_ID'),
-            Backend.DeviceType.UNKNOWN,
-            [self.create_device(child.sys_path) for child in device.children]
+            vendor_id=device.get('ID_USB_VENDOR_ID'),
+            model_id=device.get('ID_MODEL_ID'),
+            type=Backend.DeviceType.UNKNOWN,
+            path=device.sys_path,
+            children=[self.create_device(child.sys_path) for child in device.children]
         )
 
     def get_d(self, id):
