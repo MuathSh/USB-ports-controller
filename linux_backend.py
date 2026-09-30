@@ -1,22 +1,16 @@
+import pyudev
 from abc import abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
+
+import backend
 from backend import Backend
-import ctypes
-import ctypes.util
 
 
 class LinuxBackend(Backend):
 
-    # def __init__(self):
-    #     self.iokit = ctypes.cdll.LoadLibrary(ctypes.util.find_library("IOKit"))
-    #
-    #     self.cf = ctypes.CDLL(
-    #         "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation"
-    #     )
-    #
-    #     self.devices = []
-    #     self.ports = []
+    def __init__(self):
+        self.Context = pyudev.Context()
 
     class DeviceType(Enum):
         CAMERA = "camera"
@@ -26,11 +20,11 @@ class LinuxBackend(Backend):
         NETWORK = "network"
         UNKNOWN = "unknown"
 
-
     class PortType(Enum):
         USB = "usb"
         PCIE = "pcie"
         SATA = "sata"
+        BLUETOOTH = "bluetooth"
         UNKNOWN = "unknown"
 
     @dataclass
@@ -50,11 +44,49 @@ class LinuxBackend(Backend):
         type: "Backend.DeviceType"
         children: list["Backend.Device"] = field(default_factory=list)
 
+    def create_device(self, id):
+        try:
+            device = pyudev.Devices.from_name(self.Context, subsystem='usb', sys_name=id)
+        except pyudev._errors.DeviceNotFoundByNameError:
+            try:
+                device = pyudev.Devices.from_path(self.Context, id)
+            except pyudev._errors.DeviceNotFoundAtPathError:
+                print("Device not found")
+                return None
+
+        # Get vendor+model combined name.
+        vendor = device.get('ID_VENDOR_FROM_DATABASE') or device.get('ID_VENDOR') or ''
+        model = device.get('ID_MODEL_FROM_DATABASE') or device.get('ID_MODEL') or ''
+        full_name = f"{vendor} {model}".strip()
+
+        # Convert subsystem name into lower and compare it.
+        subsystem_lower = str(device.subsystem).lower()
+        try:
+            port_type = Backend.PortType(subsystem_lower)
+        except ValueError:
+            port_type = Backend.PortType.UNKNOWN
+
+        return Backend.Device(
+            int(device.sys_number),
+            full_name,
+            Backend.Port(
+                device.get('ID_USB_MODEL_ID'),
+                device.get('ID_USB_VENDOR'),
+                False if not device.driver else True,
+                port_type
+            ),
+            device.get('ID_USB_VENDOR_ID'),
+            device.get('ID_MODEL_ID'),
+            Backend.DeviceType.UNKNOWN,
+            [self.create_device(child.sys_path) for child in device.children]
+        )
+
     def get_d(self, id):
         """
         Get specific device by id
         """
-        pass
+        return self.create_device(id)
+
 
     def get_p(self, id):
         """
@@ -109,3 +141,7 @@ class LinuxBackend(Backend):
 
     def _get_children(self, entry):
         pass
+
+
+lcx = LinuxBackend()
+print(lcx.get_d('usb3'))
