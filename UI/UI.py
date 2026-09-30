@@ -40,7 +40,7 @@ PROGRAM = QApplication(sys.argv)
 
 window = QWidget()
 window.setWindowTitle("usb.cntroler")
-window.resize(1500, 750)
+window.setMinimumSize(1500, 750)
 
 window.setStyleSheet("""
     QWidget {

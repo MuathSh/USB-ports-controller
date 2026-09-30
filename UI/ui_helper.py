@@ -1,6 +1,8 @@
 from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QTreeWidgetItem
 from backend import Backend
 from PyQt6.QtCore import Qt
+import backend
+import UI
 
 #get devicec and add to tree
 def get_tree(tree: QTreeWidget, devices: list[Backend.Device]):
@@ -22,4 +24,8 @@ def get_tree(tree: QTreeWidget, devices: list[Backend.Device]):
         item.setData(0,Qt.ItemDataRole.UserRole, dev.id)
         tree.addTopLevelItem(item)
 
+#refresh tree
+def refresh(tree):
+    devices_list = backend.get_ds()
+    get_tree(tree,devices_list)
 
