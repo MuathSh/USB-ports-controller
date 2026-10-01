@@ -7,7 +7,10 @@ from PyQt6.QtWidgets import (
     QTreeWidget, 
     QTreeWidgetItem, 
     QPushButton,
-    QHeaderView
+    QHeaderView,
+    QLabel,
+    QFormLayout,
+    QFrame
 )
 from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtCore import Qt
@@ -107,11 +110,27 @@ left_layout = QVBoxLayout()
 left_layout.addWidget(tree, stretch=1)
 left_layout.addLayout(button_layout)
 
+details_panel = QFrame()
+details_panel.setObjectName("detailsPanel")
+
+details_layout = QVBoxLayout(details_panel)
+
+more_title = QLabel()
+more_title.setObjectName("detailsTitle")
+
+more_form = QFormLayout()
+
+details_layout.addWidget(more_title)
+details_layout.addLayout(more_form)
+details_layout.addStretch()
+
 main_layout = QHBoxLayout()
-main_layout.addLayout(left_layout, stretch= 6)
-main_layout.addStretch(stretch=4)
+main_layout.addLayout(left_layout, stretch=6)
+main_layout.addWidget(details_panel, stretch=4)
+
 
 window.setLayout(main_layout)
 
 window.show()
 sys.exit(PROGRAM.exec())
+
