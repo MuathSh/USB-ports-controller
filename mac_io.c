@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <IOKit/IOKitLib.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 int main(void)
 {
@@ -32,7 +33,23 @@ int main(void)
     {
         // Get the name of the device
         if (IORegistryEntryGetName(device, name) == KERN_SUCCESS) { // if the function returns 0, it means success
-            printf("%s\n", name);
+            printf("\n======== %s ========\n", name);
+
+            CFMutableDictionaryRef properties = NULL;
+            
+            result = IORegistryEntryCreateCFProperties(
+                device,                 // Get the properties of the device
+                &properties,            // The properties dictionary to be filled
+                kCFAllocatorDefault,    // The default allocator
+                0                       // 0 means no special options
+            );
+
+            if (result == KERN_SUCCESS && properties) {
+                CFShow(properties);     // Display the properties of the device
+                CFRelease(properties);  // Release the properties dictionary
+            } else {
+                printf("Failed to get properties for device: %s\n", name);
+            }
         }
 
         IOObjectRelease(device); // free
