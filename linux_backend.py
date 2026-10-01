@@ -101,6 +101,25 @@ class LinuxBackend(Backend):
         vendor_id = device.get('ID_VENDOR_ID') or device.get('PCI_VENDOR_ID') or ''
         model_id = device.get('ID_MODEL_ID') or device.get('PCI_DEVICE_ID') or ''
 
+        # Detect device type
+        if device.get('ID_INPUT_KEYBOARD') == '1':
+            device_type = Backend.DeviceType.KEYBOARD
+
+        elif device.get('ID_INPUT_MOUSE') == '1':
+            device_type = Backend.DeviceType.MOUSE
+
+        elif device.subsystem == 'net':
+            device_type = Backend.DeviceType.NETWORK
+
+        elif device.subsystem == 'block':
+            device_type = Backend.DeviceType.STORAGE
+
+        elif device.subsystem == 'video4linux':
+            device_type = Backend.DeviceType.CAMERA
+
+        else:
+            device_type = Backend.DeviceType.UNKNOWN
+
         driver = device.driver or device.get('ID_NET_DRIVER')
         return Backend.Device(
             id=device.sys_number,
@@ -114,7 +133,7 @@ class LinuxBackend(Backend):
             ),
             vendor_id=vendor_id,
             model_id=model_id,
-            type=Backend.DeviceType.UNKNOWN,
+            type=device_type,
             path=device.sys_path,
             children=[self.create_device(child.sys_path) for child in device.children]
         )
