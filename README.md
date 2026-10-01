@@ -1,5 +1,5 @@
 # USB-ports-controller
-A project that focus on controlling external and internal USB ports and show there informations
+A cross-platform project for monitoring and controlling hardware devices and ports on Linux, Windows, and macOS.
 
 ## Screanshots:
 **some of the UI used and how it works:**
@@ -22,23 +22,53 @@ rebinding device:
 
 
 ## Features
-1. Monitor every USB port weither it is an internal or external ones. 
-2. Unbind and bind ports by one click.
-3. Easy UI to understand and use
+
+1. Detect connected devices and ports.
+2. View device and port information.
+3. Enable and disable supported devices and ports.
+4. Support multiple device buses and types.
+5. Cross-platform backends for Linux, Windows, and macOS.
+6. Simple graphical interface.
 
 
 ## How to use
-### First
-**Install the libraries used:**
 
-```py
-pip install PyQt6 pyudev
+### Install dependencies
+
+```bash
+pip install PyQt6
 ```
 
+On Linux:
 
-### Second
-**Run the project:**
-```py
+```bash
+pip install pyudev
+```
+
+### Run
+
+#### Linux
+
+```bash
 sudo python3 USBcontroller.py
 ```
+
+Root privileges are required for operations such as binding and unbinding device drivers.
+
+#### macOS
+
+```bash
+python3 USBcontroller.py
+```
+
+Some device-control operations may require elevated privileges.
+
+#### Windows
+
+```powershell
+python USBcontroller.py
+```
+
+Run the terminal or application as Administrator when using device enable/disable operations.
+
 *The project need the sudo permession because it binds and unbinds USB ports*
