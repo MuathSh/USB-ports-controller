@@ -16,14 +16,16 @@ class Backend(ABC):
 
     class PortType(Enum):
         USB = "usb"
-        PCIE = "pcie"
+        PCI = "pci"
         SATA = "sata"
+        NET = "net"
         UNKNOWN = "unknown"
 
     @dataclass
     class Port:
         id: int
         name: str
+        driver: str
         state: bool
         type: "Backend.PortType"
 
@@ -39,7 +41,7 @@ class Backend(ABC):
         children: list["Backend.Device"] = field(default_factory=list)
 
     @abstractmethod
-    def get_d(self, id):
+    def get_d(self, id, subsystem='usb'):
         """
         Get specific device by id
         """
@@ -53,7 +55,7 @@ class Backend(ABC):
         pass
 
     @abstractmethod
-    def get_ds(self):
+    def get_ds(self, subsystem='usb'):
         """
         Get all devices
         """
