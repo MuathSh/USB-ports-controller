@@ -133,7 +133,7 @@ class LinuxBackend(Backend):
             ),
             vendor_id=vendor_id,
             model_id=model_id,
-            type=device_type,
+            type=port_type,
             path=device.sys_path,
             children=[self.create_device(child.sys_path) for child in device.children]
         )
