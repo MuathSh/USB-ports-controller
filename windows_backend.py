@@ -33,6 +33,25 @@ class WindowsBackend(Backend):
         self.devices = []
         self.ports = []
 
+        # Stable IDs for this backend instance, not persisted across runs.
+        self._device_ids = {}    # InstanceId -> application ID
+        self._instance_ids = {}  # application ID -> InstanceId
+
+        self.cfgmgr.CM_Get_Device_ID_Size.argtypes = [
+            ctypes.POINTER(wintypes.ULONG),
+            wintypes.DWORD,
+            wintypes.ULONG,
+        ]
+        self.cfgmgr.CM_Get_Device_ID_Size.restype = wintypes.ULONG
+
+        self.cfgmgr.CM_Get_Device_IDW.argtypes = [
+            wintypes.DWORD,
+            wintypes.LPWSTR,
+            wintypes.ULONG,
+            wintypes.ULONG,
+        ]
+        self.cfgmgr.CM_Get_Device_IDW.restype = wintypes.ULONG
+
         self.setupapi.SetupDiGetClassDevsW.argtypes = [
             ctypes.POINTER(GUID),
             wintypes.LPCWSTR,
@@ -94,21 +113,42 @@ class WindowsBackend(Backend):
         children: list["Backend.Device"] = field(default_factory=list)
 
     def get_d(self, id):
-        """Get specific stored device by id."""
+       
         for device in self.devices:
             if device.id == id:
                 return device
         return None
 
     def get_p(self, id):
-        """Get specific stored port by id."""
+    
         for port in self.ports:
             if port.id == id:
                 return port
         return None
 
     def get_ds(self):
-        """Get stored devices; scan results are not converted to Device yet."""
+    
+        results = self._scan_usb()
+        devices = []
+
+        for item in results:
+            port = Backend.Port(
+                id=-1,
+                name="Unmapped port",
+                state=False,
+                type=Backend.PortType.UNKNOWN,
+            )
+            device = Backend.Device(
+                id=item["id"],
+                name=item["name"],
+                port=port,
+                vendor_id=0,
+                model_id=0,
+                type=Backend.DeviceType.UNKNOWN,
+            )
+            devices.append(device)
+
+        self.devices = devices
         return list(self.devices)
 
     def get_ps(self):
@@ -132,7 +172,7 @@ class WindowsBackend(Backend):
         pass
 
     def _scan_usb(self):
-       
+
         handle = self.setupapi.SetupDiGetClassDevsW(None, "USB", None, 0x06)
 
         if handle == ctypes.c_void_p(-1).value:
@@ -148,7 +188,7 @@ class WindowsBackend(Backend):
                     handle, index, ctypes.byref(entry)
                 ):
                     error = ctypes.get_last_error()
-                    if error == 259:  # ERROR_NO_MORE_ITEMS
+                    if error == 259:
                         break
                     raise ctypes.WinError(error)
 
@@ -163,9 +203,9 @@ class WindowsBackend(Backend):
 
                     if not success:
                         error = ctypes.get_last_error()
-                        if error == 13:  
+                        if error == 13:
                             continue
-                        if error != 122:  
+                        if error != 122:
                             raise ctypes.WinError(error)
 
                     buffer = ctypes.create_unicode_buffer(
@@ -182,7 +222,19 @@ class WindowsBackend(Backend):
                         name = buffer.value
                         break
 
-                devices.append({"dev_inst": entry.DevInst, "name": name})
+                instance_id = self._get_registry_id(entry).upper()
+
+                if instance_id not in self._device_ids:
+                    device_id = len(self._device_ids) + 1
+                    self._device_ids[instance_id] = device_id
+                    self._instance_ids[device_id] = instance_id
+
+                devices.append({
+                    "id": self._device_ids[instance_id],
+                    "instance_id": instance_id,
+                    "dev_inst": entry.DevInst,
+                    "name": name,
+                })
         finally:
             self.setupapi.SetupDiDestroyDeviceInfoList(handle)
 
@@ -192,7 +244,26 @@ class WindowsBackend(Backend):
         pass
 
     def _get_registry_id(self, entry):
-        pass
+        """Read the Windows device instance ID from a device information entry."""
+        size = wintypes.ULONG()
+        result = self.cfgmgr.CM_Get_Device_ID_Size(
+            ctypes.byref(size), entry.DevInst, 0
+        )
+        if result != 0:
+            raise RuntimeError(
+                f"Cannot read device ID size: CONFIGRET={result}"
+            )
+
+        buffer = ctypes.create_unicode_buffer(size.value + 1)
+        result = self.cfgmgr.CM_Get_Device_IDW(
+            entry.DevInst, buffer, len(buffer), 0
+        )
+        if result != 0:
+            raise RuntimeError(
+                f"Cannot read device ID: CONFIGRET={result}"
+            )
+
+        return buffer.value
 
     def _get_children(self, entry):
         pass
@@ -200,11 +271,12 @@ class WindowsBackend(Backend):
 
 if __name__ == "__main__":
     backend = WindowsBackend()
-    devices = backend._scan_usb()
+    devices = backend.get_ds()
 
     print(f"USB devices found: {len(devices)}")
     for device in devices:
-        print(f"USB device: {device['dev_inst']} | {device['name']}")
-
+        print(f"USB device: {device.id} | {device.name}")
+        print(f"Instance ID: {backend._instance_ids[device.id]}")
+        
     if not devices:
         print("No USB devices found.")
