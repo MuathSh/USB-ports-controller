@@ -95,3 +95,10 @@ class Backend(ABC):
         Activate port by id
         """
         pass
+
+    @abstractmethod
+    def refresh(self):
+        """
+        Refresh the backend state
+        """
+        pass
