@@ -167,7 +167,13 @@ class LinuxBackend(Backend):
         """ Get all devices """
         devices = []
         for device in self.Context.list_devices(subsystem=subsystem):
-            devices.append(self.create_device(device=device))
+            dv_backend = self.create_device(device=device)
+
+            exists = any(dv_backend in dev.children for dev in devices)
+
+            if not exists and dv_backend not in devices:
+                devices.append(dv_backend)
+
         return devices
 
 
@@ -303,9 +309,9 @@ class LinuxBackend(Backend):
     #     pass
 
 
-# lcx = LinuxBackend()
-# for d in lcx.get_ds():
-#     print(d)
+lcx = LinuxBackend()
+for d in lcx.get_ds():
+    print(d,"\n")
 # for n in lcx.get_ds(subsystem='net'):
 #     print(n)
 # lcx.act_d('/sys/devices/pci0000:00/0000:00:14.0/usb3/3-9')
