@@ -36,8 +36,8 @@ class Backend(ABC):
         port: "Backend.Port"
         vendor_id: int
         model_id: int
-        type: "Backend.DeviceType"
         path: str
+        type: str
         children: list["Backend.Device"] = field(default_factory=list)
 
     @abstractmethod
