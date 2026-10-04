@@ -13,7 +13,27 @@ from PyQt6.QtWidgets import (
     QTreeWidgetItem,
     QMessageBox
 )
-from linux_backend import LinuxBackend
+
+import platform
+
+
+def create_backend():
+    system = platform.system()
+
+    if system == "Linux":
+        from linux_backend import LinuxBackend
+        return LinuxBackend()
+
+    if system == "Darwin":
+        from mac_backend import MacBackend
+        return MacBackend()
+
+    if system == "Windows":
+        from windows_backend import WindowsBackend
+        return WindowsBackend()
+
+    raise RuntimeError(f"Unsupported system: {system}")
+
 from PyQt6.QtCore import Qt
 
 class CustomButton(QPushButton):
@@ -128,7 +148,7 @@ def on_unbind_clicked(tree: QTreeWidget, backend: LinuxBackend):
         QMessageBox.critical(None, "Error", f"Failed to unbind device {dev.id}. Check root privileges.")
 
 
-backend_obj = LinuxBackend()
+backend_obj = create_backend()
 
 app = QApplication(sys.argv)
 
