@@ -58,7 +58,7 @@ class CustomButton(QPushButton):
         """)
 
 def build_tree_item(dev) -> QTreeWidgetItem:
-    type_str = dev.type
+    type_str = str(getattr(dev.type, "value", dev.type))
     status_str = "Active" if (dev.port and dev.port.state) else "Unbind"
 
     item = QTreeWidgetItem([
@@ -75,7 +75,7 @@ def build_tree_item(dev) -> QTreeWidgetItem:
 
     return item
 
-def refresh_tree(tree: QTreeWidget, backend: LinuxBackend):
+def refresh_tree(tree: QTreeWidget, backend: Backend ):
     tree.clear()
     backend.refresh()
     devices = backend.get_ds()
@@ -120,7 +120,7 @@ def get_selected_device(tree: QTreeWidget):
     return current_item.data(0, Qt.ItemDataRole.UserRole)
 
 
-def on_active_clicked(tree: QTreeWidget, backend: LinuxBackend):
+def on_active_clicked(tree: QTreeWidget, backend: Backend):
     dev = get_selected_device(tree)
     if not dev:
         QMessageBox.warning(None, "Warning", "Please select a device first.")
@@ -134,7 +134,7 @@ def on_active_clicked(tree: QTreeWidget, backend: LinuxBackend):
         QMessageBox.critical(None, "Error", f"Failed to bind device {dev.id}. Check root privileges.")
 
 
-def on_unbind_clicked(tree: QTreeWidget, backend: LinuxBackend):
+def on_unbind_clicked(tree: QTreeWidget, backend: Backend):
     dev = get_selected_device(tree)
     if not dev:
         QMessageBox.warning(None, "Warning", "Please select a device first.")
