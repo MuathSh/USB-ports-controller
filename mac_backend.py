@@ -137,6 +137,12 @@ class MacBackend(Backend):
         """
         pass
 
+    def refresh(self):
+        """
+        Refresh the backend state
+        """
+        pass
+
     def _mac_scan_usb(self):
         """
         Scan USB devices through libmac_io.dylib

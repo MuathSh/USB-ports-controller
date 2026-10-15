@@ -66,7 +66,6 @@ class LinuxBackend(Backend):
         port: "Backend.Port"
         vendor_id: int
         model_id: int
-        type: "Backend.DeviceType"
         path: str
         children: list["Backend.Device"] = field(default_factory=list)
 
@@ -122,7 +121,7 @@ class LinuxBackend(Backend):
 
         driver = device.driver or device.get('ID_NET_DRIVER')
         return Backend.Device(
-            id=device.sys_number,
+            id=device.sys_name,
             name=full_name,
             port=Backend.Port(
                 id=device.get('ID_PATH'),
@@ -133,8 +132,8 @@ class LinuxBackend(Backend):
             ),
             vendor_id=vendor_id,
             model_id=model_id,
-            type=port_type,
             path=device.sys_path,
+            type=device.get('DEVTYPE'),
             children=[self.create_device(child.sys_path) for child in device.children]
         )
 
@@ -168,7 +167,13 @@ class LinuxBackend(Backend):
         """ Get all devices """
         devices = []
         for device in self.Context.list_devices(subsystem=subsystem):
-            devices.append(self.create_device(device=device))
+            dv_backend = self.create_device(device=device)
+
+            exists = any(dv_backend in dev.children for dev in devices)
+
+            if not exists and dv_backend not in devices:
+                devices.append(dv_backend)
+
         return devices
 
 
@@ -285,6 +290,12 @@ class LinuxBackend(Backend):
         """
         pass
 
+    def refresh(self):
+        """
+        Refresh the backend state
+        """
+        pass
+
     # def _scan_usb(self):
     #     pass
     #
@@ -300,8 +311,8 @@ class LinuxBackend(Backend):
 
 lcx = LinuxBackend()
 for d in lcx.get_ds():
-    print(d)
-for n in lcx.get_ds(subsystem='net'):
-    print(n)
-lcx.act_d('/sys/devices/pci0000:00/0000:00:14.0/usb3/3-9')
+    print(d,"\n")
+# for n in lcx.get_ds(subsystem='net'):
+#     print(n)
+# lcx.act_d('/sys/devices/pci0000:00/0000:00:14.0/usb3/3-9')
 # print(lcx.get_d(id='usb3'))
