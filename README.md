@@ -24,7 +24,7 @@ rebinding device:
 ## Features
 
 1. Detect connected devices and ports.
-2. View device and port information.
+2. View devices and ports information.
 3. Enable and disable supported devices and ports.
 4. Support multiple device buses and types.
 5. Cross-platform backends for Linux, Windows, and macOS.
