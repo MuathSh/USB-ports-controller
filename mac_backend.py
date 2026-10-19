@@ -61,6 +61,7 @@ class MacBackend(Backend):
     class Port:
         id: int
         name: str
+        driver: str | None
         state: bool
         type: "Backend.PortType"
 
@@ -71,6 +72,7 @@ class MacBackend(Backend):
         port: "Backend.Port"
         vendor_id: int
         model_id: int
+        path: str | None
         type: "Backend.DeviceType"
         children: list["Backend.Device"] = field(default_factory=list)
 
@@ -172,6 +174,7 @@ class MacBackend(Backend):
                 port = self.UsbPort(
                     id=raw.port_id,
                     name=raw.port_name.decode("utf-8", errors="replace"),
+                    driver=None,
                     state=True,
                     type=self.PortType.USB,
                     gen="UNKNOWN",  # Temporary unknown value
@@ -187,6 +190,7 @@ class MacBackend(Backend):
                 port=ports_by_id[raw.port_id],
                 vendor_id=raw.vendor_id,
                 model_id=raw.product_id,
+                path=None,
 
                 # We haven't classified devices yet
                 type=self.DeviceType.UNKNOWN,
